@@ -2,6 +2,43 @@
 #include <random>
 #include <png++/png.hpp>
 
+void draw_triangle(
+	png::image<png::rgb_pixel>& image,
+	const uint32_t x0, const uint32_t y0,
+	const uint32_t x1, const uint32_t y1,
+	const uint32_t x2, const uint32_t y2,
+	const uint32_t image_x, const uint32_t image_y,
+	const png::rgb_pixel pixel) {
+	const auto max_x = std::max(x0, std::max(x1, x2));
+	const auto max_y = std::max(y0, std::max(y1, y2));
+	const auto min_x = std::min(x0, std::min(x1, x2));
+	const auto min_y = std::min(y0, std::min(y1, y2));
+
+	for (uint32_t x = min_x; x < max_x; x++) {
+		if (x >= image_x) break;
+		for (uint32_t y = min_y; y < max_y; y++) {
+			if (y >= image_y) break;
+			const int32_t dx1 = static_cast<int32_t>(x1) - static_cast<int32_t>(x0);
+			const int32_t dy1 = static_cast<int32_t>(y1) - static_cast<int32_t>(y0);
+			const int32_t dx2 = static_cast<int32_t>(x2) - static_cast<int32_t>(x0);
+			const int32_t dy2 = static_cast<int32_t>(y2) - static_cast<int32_t>(y0);
+
+			const int32_t dxp = static_cast<int32_t>(x) - static_cast<int32_t>(x0);
+			const int32_t dyp = static_cast<int32_t>(y) - static_cast<int32_t>(y0);
+
+			const auto det = dx1 * dy2 - dx2 * dy1;
+			if (det == 0) return;
+
+			const auto a = ( dxp * dy2 - dyp * dx2) / static_cast<double>(det);
+			const auto b = (-dxp * dy1 + dyp * dx1) / static_cast<double>(det);
+
+			if (a + b <= 1 && a >= 0 && b >= 0) {
+				image.set_pixel(x, y, pixel);
+			}
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 	if (argc < 4) {
 		std::fprintf(stderr, "Usage : %s width height output.png\n", argv[0]);
