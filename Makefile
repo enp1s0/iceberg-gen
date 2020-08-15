@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++14 -I./src
+CXXFLAGS=-std=c++14 -I./src -lpng
 TARGET=iceberg-gen.out
 
 $(TARGET) : src/main.cpp
