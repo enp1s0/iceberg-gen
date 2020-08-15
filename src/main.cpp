@@ -14,10 +14,10 @@ void draw_triangle(
 	const auto min_x = std::min(x0, std::min(x1, x2));
 	const auto min_y = std::min(y0, std::min(y1, y2));
 
+#pragma omp parallel for
 	for (uint32_t x = min_x; x < max_x; x++) {
-		if (x >= image_x) break;
 		for (uint32_t y = min_y; y < max_y; y++) {
-			if (y >= image_y) break;
+			if (y >= image_y || x >= image_x) break;
 			const int32_t dx1 = static_cast<int32_t>(x1) - static_cast<int32_t>(x0);
 			const int32_t dy1 = static_cast<int32_t>(y1) - static_cast<int32_t>(y0);
 			const int32_t dx2 = static_cast<int32_t>(x2) - static_cast<int32_t>(x0);
@@ -27,13 +27,55 @@ void draw_triangle(
 			const int32_t dyp = static_cast<int32_t>(y) - static_cast<int32_t>(y0);
 
 			const auto det = dx1 * dy2 - dx2 * dy1;
-			if (det == 0) return;
+			if (det != 0) {
+				const auto a = ( dxp * dy2 - dyp * dx2) / static_cast<double>(det);
+				const auto b = (-dxp * dy1 + dyp * dx1) / static_cast<double>(det);
 
-			const auto a = ( dxp * dy2 - dyp * dx2) / static_cast<double>(det);
-			const auto b = (-dxp * dy1 + dyp * dx1) / static_cast<double>(det);
+				if (a + b <= 1 && a >= 0 && b >= 0) {
+					image.set_pixel(x, y, pixel);
+				}
+			}
+		}
+	}
+}
 
-			if (a + b <= 1 && a >= 0 && b >= 0) {
-				image.set_pixel(x, y, pixel);
+void draw_circule(
+	png::image<png::rgb_pixel>& image,
+	const uint32_t x0, const uint32_t y0,
+	const uint32_t r,
+	const uint32_t image_x, const uint32_t image_y,
+	const png::rgb_pixel pixel) {
+	constexpr unsigned scale = 4;
+
+	for (uint32_t i = 0; i < 2 * r; i++) {
+		for (uint32_t j = 0; j < 2 * r; j++) {
+			double mask = 0;
+			for (uint32_t si = 0; si < scale; si++) {
+				for (uint32_t sj = 0; sj < scale; sj++) {
+					const auto ei = si + i * scale;
+					const auto ej = sj + j * scale;
+
+					const auto diff_i = ei - r * scale;
+					const auto diff_j = ej - r * scale;
+
+					if (diff_i * diff_i + diff_j * diff_j < (scale * r) * (scale * r)) {
+						mask += 1.0;
+					}
+				}
+			}
+			mask /= scale * scale;
+
+			const auto ix = static_cast<int32_t>(i) - r + x0;
+			const auto iy = static_cast<int32_t>(j) - r + y0;
+
+			if (ix >= 0 && image_x > ix && iy >= 0 && image_y > iy && mask > (0.9 / scale)) {
+				const auto back_pixel = image.get_pixel(ix, iy);
+				image.set_pixel(ix, iy,
+								png::rgb_pixel(
+									pixel.red * mask + back_pixel.red * (1 - mask),
+									pixel.green * mask + back_pixel.green * (1 - mask),
+									pixel.blue * mask + back_pixel.blue * (1 - mask)
+									));
 			}
 		}
 	}
