@@ -83,15 +83,38 @@ void draw_circule(
 
 int main(int argc, char** argv) {
 	if (argc < 4) {
-		std::fprintf(stderr, "Usage : %s width height output.png\n", argv[0]);
+		std::fprintf(stderr, "Usage : %s width height output.png [m|s]\n", argv[0]);
 		return 1;
 	}
 
 	std::mt19937 mt(std::random_device{}());
 
-	const uint32_t image_width = std::stoi(argv[1]);
-	const uint32_t image_height = std::stoi(argv[2]);
+	const uint32_t output_image_width = std::stoi(argv[1]);
+	const uint32_t output_image_height = std::stoi(argv[2]);
+
+	const uint32_t image_width = output_image_width;
+	const uint32_t image_height = output_image_height;
 	const std::string output_file = argv[3];
+
+	bool star_flag = false;
+	bool moon_flag = false;
+
+	if (argc >= 5) {
+		const char* additional_flag = argv[4];
+		const auto num_flag = std::strlen(additional_flag);
+		for (unsigned i = 0; i < num_flag; i++) {
+			switch(additional_flag[i]) {
+			case 's':
+				star_flag = true;
+				break;
+			case 'm':
+				moon_flag = true;
+				break;
+			default:
+				break;
+			}
+		}
+	}
 
 	png::image<png::rgb_pixel> image(image_width, image_height);
 
@@ -99,9 +122,10 @@ int main(int argc, char** argv) {
 	const auto dark_gray_background = png::rgb_pixel(255 * 0.086, 255 * 0.094, 255 * 0.129);
 	const auto light_gray_background = png::rgb_pixel(255 * 0.118, 255 * 0.129, 255 * 0.196);
 	const auto dark_gray_iceberg = png::rgb_pixel(255 * 0.776, 255 * 0.784, 255 * 0.82);
-	std::uniform_int_distribution<int> color_noise_dist(-2, 2);
+	std::uniform_int_distribution<int> color_noise_dist(-0, 0);
 
 	// background
+#pragma omp parallel for
 	for (uint32_t w = 0; w < image_width; w++) {
 		for (uint32_t h = 0; h < image_height / 2; h++) {
 			image[h][w] = dark_gray_background;
@@ -126,10 +150,10 @@ int main(int argc, char** argv) {
 
 	auto bottom_start_w = image_width / 3;
 	const auto bottom_iceberg_y = image_height / 2;
-	const auto max_bottom_iceberg_block_width = iceberg_width;
+	const auto max_bottom_iceberg_block_width = 4 * iceberg_width / 5;
 	const auto min_bottom_iceberg_block_width = iceberg_width / 2;
-	const auto max_bottom_iceberg_block_stride = iceberg_width / 3;
-	const auto min_bottom_iceberg_block_stride = iceberg_width / 4;
+	const auto max_bottom_iceberg_block_stride = iceberg_width / 6;
+	const auto min_bottom_iceberg_block_stride = iceberg_width / 7;
 	std::uniform_int_distribution<uint32_t> dist_bottom_iceberg_block_width(min_bottom_iceberg_block_width, max_bottom_iceberg_block_width);
 	std::uniform_int_distribution<uint32_t> dist_bottom_iceberg_block_stride(min_bottom_iceberg_block_stride, max_bottom_iceberg_block_stride);
 
@@ -145,10 +169,6 @@ int main(int argc, char** argv) {
 			255 * 0.776 + color_noise_dist(mt),
 			255 * 0.784 + color_noise_dist(mt),
 			255 * 0.820 + color_noise_dist(mt));
-		const auto dark_gray_iceberg = png::rgb_pixel(
-			255 * 0.42 + color_noise_dist(mt),
-			255 * 0.439 + color_noise_dist(mt),
-			255 * 0.53 + color_noise_dist(mt));
 
 		draw_triangle(
 			image,
