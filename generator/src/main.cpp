@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
 			draw_circule(
 				image,
 				x, y,
-				std::min(image_width, image_height) / 200,
+				std::max(image_width, image_height) / 400,
 				image_width, image_height,
 				moon_gray_iceberg
 				);
@@ -248,14 +248,14 @@ int main(int argc, char** argv) {
 		draw_circule(
 			image,
 			4 * image_width / 7, image_height / 5,
-			std::min(image_width, image_height) / 20,
+			std::max(image_width, image_height) / 40,
 			image_width, image_height,
 			moon_gray_iceberg
 			);
 		draw_circule(
 			image,
 			4 * image_width / 7 * 1.02, image_height / 5 * 0.97,
-			std::min(image_width, image_height) / 24,
+			std::max(image_width, image_height) / 48,
 			image_width, image_height,
 			dark_gray_background	
 			);
