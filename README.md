@@ -28,3 +28,8 @@ make
 - 2nd : output image height
 - 3rd : output image file name
 - 4th : options. `m` means `moon` and `s` means `stars`
+
+## License
+
+iceberg-gen is MIT-style licensed, as found in the file [LICENSE](LICENSE) file.
+And this software uses [png++](https://www.nongnu.org/pngpp/).
