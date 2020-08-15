@@ -217,5 +217,49 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	// stars
+	if (star_flag) {
+		const auto moon_gray_iceberg = png::rgb_pixel(
+			255 * 0.876 + color_noise_dist(mt),
+			255 * 0.884 + color_noise_dist(mt),
+			255 * 0.920 + color_noise_dist(mt));
+		std::uniform_int_distribution<uint32_t> dist_x_stride(image_width / 5, image_width / 4);
+		std::uniform_int_distribution<uint32_t> dist_y(0, image_height / 3);
+		uint32_t x = image_width / 10;
+		for (unsigned i = 0; i < 5; i++) {
+			const auto y = dist_y(mt);
+			draw_circule(
+				image,
+				x, y,
+				std::min(image_width, image_height) / 200,
+				image_width, image_height,
+				moon_gray_iceberg
+				);
+			x += dist_x_stride(mt);
+		}
+	}
+
+	// moon
+	if (moon_flag) {
+		const auto moon_gray_iceberg = png::rgb_pixel(
+			255 * 0.876 + color_noise_dist(mt),
+			255 * 0.884 + color_noise_dist(mt),
+			255 * 0.920 + color_noise_dist(mt));
+		draw_circule(
+			image,
+			4 * image_width / 7, image_height / 5,
+			std::min(image_width, image_height) / 20,
+			image_width, image_height,
+			moon_gray_iceberg
+			);
+		draw_circule(
+			image,
+			4 * image_width / 7 * 1.02, image_height / 5 * 0.97,
+			std::min(image_width, image_height) / 24,
+			image_width, image_height,
+			dark_gray_background	
+			);
+	}
+
 	image.write(output_file);
 }
