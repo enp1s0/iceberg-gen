@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
 			255 * 0.884 + color_noise_dist(mt),
 			255 * 0.920 + color_noise_dist(mt));
 		std::uniform_int_distribution<uint32_t> dist_x_stride(image_width / 5, image_width / 4);
-		std::uniform_int_distribution<uint32_t> dist_y(0, image_height / 3);
+		std::uniform_int_distribution<uint32_t> dist_y(image_height / 10, image_height / 3);
 		uint32_t x = image_width / 10;
 		for (unsigned i = 0; i < 5; i++) {
 			const auto y = dist_y(mt);
